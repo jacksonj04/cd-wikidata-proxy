@@ -83,7 +83,7 @@ def cleanup_csv():
             writer.writerow(person)
 
         response = make_response(output.getvalue())
-        response.headers["Content-type"] = "text/csv"
+        response.headers["Content-type"] = "text/csv;charset=UTF-8"
 
         return response
 
