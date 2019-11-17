@@ -93,7 +93,9 @@ def cleanup_csv():
             else:
                 person['area_id'] = 'UNMAPPED POST TO AREA {}'.format(row['post_id'])
 
-            writer.writerow(person)
+            if (not request.args.get('party')) or (row['party_id'] == request.args.get('party')):
+
+                writer.writerow(person)
 
         if request.args.get('unmapped'):
 
