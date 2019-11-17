@@ -50,6 +50,7 @@ def cleanup_csv():
         output = io.StringIO()
 
         fieldnames = [
+            'name',
             'dc_id',
             'wikidata_id',
             'party_id',
@@ -63,6 +64,7 @@ def cleanup_csv():
         for row in reader:
 
             person = {
+                'name': row['name'],
                 'dc_id': row['id'],
                 'wikidata_id': row['wikidata_id'],
                 'twitter_username': row['twitter_username']
