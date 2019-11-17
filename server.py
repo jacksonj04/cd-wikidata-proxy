@@ -55,6 +55,7 @@ def cleanup_csv():
             'wikidata_id',
             'party_id',
             'area_id',
+            'gender',
             'twitter_username'
         ]
 
@@ -67,6 +68,7 @@ def cleanup_csv():
                 'name': row['name'],
                 'dc_id': row['id'],
                 'wikidata_id': row['wikidata_id'],
+                'gender': row['gender'],
                 'twitter_username': row['twitter_username']
             }
 
