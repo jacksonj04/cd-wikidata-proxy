@@ -62,6 +62,9 @@ def cleanup_csv():
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
 
+        unmapped_parties = {}
+        unmapped_people = {}
+
         for row in reader:
 
             person = {
@@ -76,6 +79,14 @@ def cleanup_csv():
                 person['party_id'] = PARTY_MAP[row['party_id']]
             else:
                 person['party_id'] = 'UNMAPPED PARTY {}'.format(row['party_id'])
+                if row['party_id'] in unmapped_parties:
+                    unmapped_parties[row['party_id']]['count'] = unmapped_parties[row['party_id']]['count'] + 1
+                else:
+                    unmapped_parties[row['party_id']] = {
+                        'count': 1,
+                        'name': row['party_name']
+                    }
+
 
             if row['post_id'] in AREA_MAP:
                 person['area_id'] = AREA_MAP[row['post_id']]
@@ -84,10 +95,37 @@ def cleanup_csv():
 
             writer.writerow(person)
 
-        response = make_response(output.getvalue())
-        response.headers["Content-type"] = "text/csv;charset=UTF-8"
+        if request.args.get('unmapped'):
 
-        return response
+            if request.args.get('unmapped') == 'parties':
+
+                output = '<h1>Unmapped Parties</h1>'
+                output += '<table>'
+                output += '<tr><td></td><th>ID</th><th>Name</th><th>Number</th></tr>'
+
+                i = 1
+                total = 0
+
+                for (id, data) in sorted(unmapped_parties.items(), key=lambda v: v[1]['count'], reverse=True):
+                    output += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(i, id, data['name'], data['count'])
+                    i += 1
+                    total += data['count']
+
+                output += '<tr><td></td><td></td><td></td><td>{}</td></tr>'.format(total)
+                output += '</table>'
+
+                return output
+
+            else:
+
+                return('<p>For unmapped data report, set <code>unmapped</code> to <code>parties</code>.</p>')
+
+        else:
+
+            response = make_response(output.getvalue())
+            response.headers["Content-type"] = "text/csv;charset=UTF-8"
+
+            return response
 
 
 app.run(
