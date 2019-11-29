@@ -6,6 +6,7 @@ from flask import request
 from flask import make_response
 
 import csv
+import re
 
 import requests
 import requests_cache
@@ -56,7 +57,8 @@ def cleanup_csv():
             'party_id',
             'area_id',
             'gender',
-            'twitter_username'
+            'twitter_username',
+            'twfy_id'
         ]
 
         writer = csv.DictWriter(output, fieldnames=fieldnames)
@@ -92,6 +94,9 @@ def cleanup_csv():
                 person['area_id'] = AREA_MAP[row['post_id']]
             else:
                 person['area_id'] = 'UNMAPPED POST TO AREA {}'.format(row['post_id'])
+
+            if row['parlparse_id']:
+                person['twfy_id'] = re.match(r'.*/([0-9]+)', row['parlparse_id']).group(1)
 
             if (not request.args.get('party')) or (row['party_id'] == request.args.get('party')):
 
