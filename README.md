@@ -10,3 +10,9 @@ These CSV files map Democracy Club identifiers for areas (derived from GSS codes
 
 * [CSV of Area IDs](https://github.com/jacksonj04/dc-wikidata-proxy/blob/master/maps/areas.csv)
 * [CSV of Party IDs](https://github.com/jacksonj04/dc-wikidata-proxy/blob/master/maps/parties.csv)
+
+## Examples
+
+* [2019 United Kingdom General Election](https://www.wikidata.org/wiki/User:Jacksonj04/2019_General_Election/Prompt/DC)
+* [2019 EU Parliament Elections](https://www.wikidata.org/wiki/User:Jacksonj04/2019_EU_Elections/Prompt/DC)
+* [2019 Leeds City Council election](https://www.wikidata.org/wiki/User:Jacksonj04/Leeds/Prompt/2019)
