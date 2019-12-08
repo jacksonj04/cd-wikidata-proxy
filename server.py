@@ -73,7 +73,7 @@ def cleanup_csv():
                 'name': row['name'],
                 'dc_id': row['id'],
                 'wikidata_id': row['wikidata_id'],
-                'gender': row['gender'],
+                'gender': row['gender'].lower(),
                 'twitter_username': row['twitter_username']
             }
 
