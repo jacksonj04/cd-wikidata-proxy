@@ -1,7 +1,7 @@
 from os import environ
 import io
 
-from flask import Flask
+from flask import Flask, url_for
 from flask import request
 from flask import make_response
 
@@ -32,15 +32,16 @@ AREA_MAP = load_map('areas')
 
 requests_cache.install_cache(expire_after=600)
 
-app = Flask(__name__)
+APP = Flask(__name__)
 
 
-@app.route("/")
-def cleanup_csv():
+@APP.route('/<election_id>', defaults={'view': 'html'})
+@APP.route('/<election_id>/<view>')
+def election(election_id, view):
 
-    url = 'https://candidates.democracyclub.org.uk/media/candidates-{id}.csv'.format(id=request.args.get('id'))
+    url = 'https://candidates.democracyclub.org.uk/media/candidates-{id}.csv'.format(id=election_id)
 
-    app.logger.info('Getting CSV at {url}'.format(
+    APP.logger.info('Getting CSV at {url}'.format(
         url=url
     ))
 
@@ -65,6 +66,7 @@ def cleanup_csv():
         writer.writeheader()
 
         unmapped_parties = {}
+        unmapped_areas = {}
         unmapped_people = {}
 
         for row in reader:
@@ -94,6 +96,13 @@ def cleanup_csv():
                 person['area_id'] = AREA_MAP[row['post_id']]
             else:
                 person['area_id'] = 'UNMAPPED POST TO AREA {}'.format(row['post_id'])
+                if row['post_id'] in unmapped_areas:
+                    unmapped_areas[row['post_id']]['count'] = unmapped_areas[row['post_id']]['count'] + 1
+                else:
+                    unmapped_areas[row['post_id']] = {
+                        'count': 1,
+                        'name': row['post_label']
+                    }
 
             if row['parlparse_id']:
                 person['twfy_id'] = re.match(r'.*/([0-9]+)', row['parlparse_id']).group(1)
@@ -102,13 +111,26 @@ def cleanup_csv():
 
                 writer.writerow(person)
 
-        if request.args.get('unmapped'):
+        if view == 'csv':
 
-            if request.args.get('unmapped') == 'parties':
+            response = make_response(output.getvalue())
+            response.headers["Content-type"] = "text/csv;charset=UTF-8"
 
-                output = '<h1>Unmapped Parties</h1>'
+            return response
+
+        else:
+
+            output = '<h1>Democracy Club to Wikidata Candidate Data Proxy</h1>'
+            output += '<h2>{id}</h2>'.format(id=election_id)
+            output += '<p>Source: <code>{url}</code></p>'.format(url=url)
+            output += '<hr>'
+
+            if view == 'unmapped-parties':
+
+                output += '<h3>Unmapped Parties Report</h3>'
+
                 output += '<table>'
-                output += '<tr><td></td><th>ID</th><th>Name</th><th>Number</th></tr>'
+                output += '<tr><td></td><th>ID</th><th>Name</th><th>Total Instances</th></tr>'
 
                 i = 1
                 total = 0
@@ -121,21 +143,39 @@ def cleanup_csv():
                 output += '<tr><td></td><td></td><td></td><td>{}</td></tr>'.format(total)
                 output += '</table>'
 
-                return output
+            elif view == 'unmapped-areas':
+
+                output += '<h3>Unmapped Areas Report</h3>'
+
+                output += '<table>'
+                output += '<tr><td></td><th>ID</th><th>Name</th><th>Total Instances</th></tr>'
+
+                i = 1
+                total = 0
+
+                for (id, data) in sorted(unmapped_areas.items(), key=lambda v: v[1]['count'], reverse=True):
+                    output += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(i, id, data['name'], data['count'])
+                    i += 1
+                    total += data['count']
+
+                output += '<tr><td></td><td></td><td></td><td>{}</td></tr>'.format(total)
+                output += '</table>'
 
             else:
 
-                return('<p>For unmapped data report, set <code>unmapped</code> to <code>parties</code>.</p>')
+                output += '<p>HTML view will go here for debugging.</p>'
 
-        else:
+            output += '<hr>'
+            output += '<p><a href="{data_url}">data</a> &middot; <a href="{um_parties_url}">unmapped parties report</a> &middot; <a href="{um_areas_url}">unmapped areas report</a></p>'.format(
+                data_url=url_for('election', election_id=election_id),
+                um_parties_url=url_for('election', election_id=election_id, view='unmapped-parties'),
+                um_areas_url=url_for('election', election_id=election_id, view='unmapped-areas')
+            )
 
-            response = make_response(output.getvalue())
-            response.headers["Content-type"] = "text/csv;charset=UTF-8"
-
-            return response
+            return output
 
 
-app.run(
+APP.run(
     host='0.0.0.0',
     port=environ.get('PORT')
 )
