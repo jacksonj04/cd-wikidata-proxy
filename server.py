@@ -11,6 +11,8 @@ import re
 import requests
 import requests_cache
 
+import urllib.parse
+
 import codecs
 from contextlib import closing
 
@@ -130,13 +132,16 @@ def election(election_id, view):
                 output += '<h3>Unmapped Parties Report</h3>'
 
                 output += '<table>'
-                output += '<tr><td></td><th>ID</th><th>Name</th><th>Total Instances</th></tr>'
+                output += '<tr><td></td><th>ID</th><th>Name</th><th>Total Instances</th><th>Search</th>''</tr>'
 
                 i = 1
                 total = 0
 
                 for (id, data) in sorted(unmapped_parties.items(), key=lambda v: v[1]['count'], reverse=True):
-                    output += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(i, id, data['name'], data['count'])
+                    output += '<tr>'
+                    output += '<td>{}</td><td>{}</td><td>{}</td><td>{}</td>'.format(i, id, data['name'], data['count'])
+                    output += '<td><a href="https://www.wikidata.org/w/index.php?search={}" target="_blank">Wikidata</a></td>'.format(urllib.parse.quote(data['name']))
+                    output += '</tr>'
                     i += 1
                     total += data['count']
 
