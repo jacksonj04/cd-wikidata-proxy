@@ -18,3 +18,4 @@ The following prompts on Wikidata use this CSV proxy tool.
 * [2019 United Kingdom General Election](https://www.wikidata.org/wiki/User:Jacksonj04/2019_General_Election/Prompt/DC)
 * [2019 EU Parliament Elections](https://www.wikidata.org/wiki/User:Jacksonj04/2019_EU_Elections/Prompt/DC)
 * [2019 Leeds City Council election](https://www.wikidata.org/wiki/User:Jacksonj04/Leeds/Prompt/2019)
+* [2021 Leeds City Council election](https://www.wikidata.org/wiki/User:Jacksonj04/Leeds/Prompt/2021)
